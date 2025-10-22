@@ -1,25 +1,34 @@
 import React, { useState, useEffect } from 'react';
+import { useApi } from '../hooks/useApi';
 
 // ...existing code...
 function ListaUsuarios({ onSeleccionar, mostrarAdmins, mostrarSoloAdmins }) {
   const [usuarios, setUsuarios] = useState([]);
   const [seleccionado, setSeleccionado] = useState(null);
   const [editData, setEditData] = useState({ nombre: '', correo: '', contrasena: '' });
+  const { request } = useApi();
 
   useEffect(() => {
     cargarUsuarios();
   }, []);
 
   const cargarUsuarios = async () => {
-    const res = await fetch('http://localhost:3000/api/usuarios');
-    const data = await res.json();
-    setUsuarios(data);
+    try {
+      const data = await request('/usuarios');
+      setUsuarios(data);
+    } catch (err) {
+      console.error('Error al cargar usuarios:', err);
+    }
   };
 
   const eliminarUsuario = async (id) => {
-    await fetch(`http://localhost:3000/api/usuarios/${id}`, { method: 'DELETE' });
-    setSeleccionado(null);
-    cargarUsuarios();
+    try {
+      await request(`/usuarios/${id}`, { method: 'DELETE' });
+      setSeleccionado(null);
+      cargarUsuarios();
+    } catch (err) {
+      console.error('Error al eliminar usuario:', err);
+    }
   };
 
   const seleccionarUsuario = (usuario) => {
@@ -28,13 +37,17 @@ function ListaUsuarios({ onSeleccionar, mostrarAdmins, mostrarSoloAdmins }) {
   };
 
   const guardarEdicion = async () => {
-    await fetch(`http://localhost:3000/api/usuarios/${seleccionado._id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editData)
-    });
-    setSeleccionado(null);
-    cargarUsuarios();
+    try {
+      await request(`/usuarios/${seleccionado._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editData)
+      });
+      setSeleccionado(null);
+      cargarUsuarios();
+    } catch (err) {
+      console.error('Error al guardar edición:', err);
+    }
   };
 
   return (
@@ -104,15 +117,23 @@ function ListaUsuarios({ onSeleccionar, mostrarAdmins, mostrarSoloAdmins }) {
             <button onClick={() => eliminarUsuario(seleccionado._id)} style={{background:'#dc3545', color:'#fff'}}>Eliminar</button>
             {seleccionado.suspendido ? (
               <button onClick={async () => {
-                await fetch(`http://localhost:3000/api/usuarios/${seleccionado._id}/activar`, { method: 'PUT' });
-                setSeleccionado(null);
-                cargarUsuarios();
+                try {
+                  await request(`/usuarios/${seleccionado._id}/activar`, { method: 'PUT' });
+                  setSeleccionado(null);
+                  cargarUsuarios();
+                } catch (err) {
+                  console.error('Error al activar usuario:', err);
+                }
               }} style={{background:'#007bff', color:'#fff'}}>Activar</button>
             ) : (
               <button onClick={async () => {
-                await fetch(`http://localhost:3000/api/usuarios/${seleccionado._id}/suspender`, { method: 'PUT' });
-                setSeleccionado(null);
-                cargarUsuarios();
+                try {
+                  await request(`/usuarios/${seleccionado._id}/suspender`, { method: 'PUT' });
+                  setSeleccionado(null);
+                  cargarUsuarios();
+                } catch (err) {
+                  console.error('Error al suspender usuario:', err);
+                }
               }} style={{background:'#ffc107', color:'#333'}}>Suspender</button>
             )}
             <button onClick={() => setSeleccionado(null)} style={{background:'#888', color:'#fff'}}>Cerrar</button>

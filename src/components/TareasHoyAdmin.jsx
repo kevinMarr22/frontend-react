@@ -24,8 +24,7 @@ function TareasHoyAdmin() {
 
   const cargarUsuarios = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/usuarios');
-      const data = await res.json();
+      const data = await request('/usuarios');
       setUsuarios(data.filter(u => u.rol === 'usuario' && !u.suspendido));
     } catch (err) {
       // No bloquear si falla

@@ -1,21 +1,27 @@
 
 import React, { useState } from 'react';
 import ListaUsuarios from './ListaUsuarios';
+import { useApi } from '../hooks/useApi';
 
 function UsuariosCrud() {
   const [mostrarCrear, setMostrarCrear] = useState(false);
   const [mostrarLista, setMostrarLista] = useState(false);
   const [mostrarAdmins, setMostrarAdmins] = useState(false);
   const [nuevo, setNuevo] = useState({ nombre: '', correo: '', contrasena: '', rol: 'usuario' });
+  const { request } = useApi();
 
   const crearUsuario = async () => {
-    await fetch('http://localhost:3000/api/usuarios/crear', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(nuevo)
-    });
-    setNuevo({ nombre: '', correo: '', contrasena: '', rol: 'usuario' });
-    alert('Usuario creado');
+    try {
+      await request('/usuarios/crear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevo)
+      });
+      setNuevo({ nombre: '', correo: '', contrasena: '', rol: 'usuario' });
+      alert('Usuario creado');
+    } catch (err) {
+      alert('Error al crear usuario: ' + err.message);
+    }
   };
 
   return (

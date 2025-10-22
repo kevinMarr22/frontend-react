@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { exportarReportePDF } from '../utils/pdfUtils';
 import { FaFilePdf } from 'react-icons/fa';
+import { useApi } from '../hooks/useApi';
 
 function ReportesAvanzado() {
   const [usuarios, setUsuarios] = useState([]);
@@ -12,12 +13,19 @@ function ReportesAvanzado() {
   const [pagando, setPagando] = useState(false);
   const [resumen, setResumen] = useState({});
   const [tareas, setTareas] = useState([]);
+  const { request } = useApi();
 
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/usuarios')
-      .then(r => r.json())
-      .then(setUsuarios);
+    const cargarUsuarios = async () => {
+      try {
+        const data = await request('/usuarios');
+        setUsuarios(data);
+      } catch (err) {
+        console.error('Error al cargar usuarios:', err);
+      }
+    };
+    cargarUsuarios();
   }, []);
 
   useEffect(() => {
@@ -35,45 +43,61 @@ function ReportesAvanzado() {
 
   // Cargar todas las tareas asignadas filtradas por periodo
   const cargarTodasTareasPorPeriodo = async (periodoSel = '') => {
-    let url = 'http://localhost:3000/api/reportes/por-usuario?';
-    if (periodoSel) url += `periodo=${periodoSel}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    // Solo tareas asignadas
-    const tareasAsignadas = data.filter(t => t.asignadoA);
-    setTareas(tareasAsignadas.map(t => ({
-      ...t,
-      usuario: t.asignadoA?.nombre || ''
-    })));
+    try {
+      const params = new URLSearchParams();
+      if (periodoSel) params.append('periodo', periodoSel);
+      const endpoint = `/reportes/por-usuario?${params.toString()}`;
+      const data = await request(endpoint);
+      // Solo tareas asignadas
+      const tareasAsignadas = data.filter(t => t.asignadoA);
+      setTareas(tareasAsignadas.map(t => ({
+        ...t,
+        usuario: t.asignadoA?.nombre || ''
+      })));
+    } catch (err) {
+      console.error('Error al cargar tareas por periodo:', err);
+    }
   };
 
 
   const cargarTareasUsuario = async (usuarioIdSel, periodoSel = '') => {
-    let url = `http://localhost:3000/api/reportes/por-usuario?usuarioId=${usuarioIdSel}`;
-    if (periodoSel) url += `&periodo=${periodoSel}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    setDetalleUsuario({ tareas: data });
+    try {
+      const params = new URLSearchParams({ usuarioId: usuarioIdSel });
+      if (periodoSel) params.append('periodo', periodoSel);
+      const endpoint = `/reportes/por-usuario?${params.toString()}`;
+      const data = await request(endpoint);
+      setDetalleUsuario({ tareas: data });
+    } catch (err) {
+      console.error('Error al cargar tareas de usuario:', err);
+    }
   };
 
   const cargarSaldo = async (usuarioIdSel, periodoSel = '') => {
-    let url = `http://localhost:3000/api/reportes/saldo-pendiente?usuarioId=${usuarioIdSel}`;
-    if (periodoSel) url += `&periodo=${periodoSel}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    setSaldo(data);
+    try {
+      const params = new URLSearchParams({ usuarioId: usuarioIdSel });
+      if (periodoSel) params.append('periodo', periodoSel);
+      const endpoint = `/reportes/saldo-pendiente?${params.toString()}`;
+      const data = await request(endpoint);
+      setSaldo(data);
+    } catch (err) {
+      console.error('Error al cargar saldo:', err);
+    }
   };
 
   const marcarPagado = async () => {
     setPagando(true);
-    await fetch('http://localhost:3000/api/reportes/marcar-pagadas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usuarioId, periodo })
-    });
+    try {
+      await request('/reportes/marcar-pagadas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId, periodo })
+      });
+      cargarSaldo(usuarioId, periodo);
+      cargarTareasUsuario(usuarioId, periodo);
+    } catch (err) {
+      console.error('Error al marcar pagado:', err);
+    }
     setPagando(false);
-    cargarSaldo(usuarioId, periodo);
-    cargarTareasUsuario(usuarioId, periodo);
   };
 
   return (
