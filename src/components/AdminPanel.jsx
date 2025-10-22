@@ -4,6 +4,7 @@ import { CrearTarea } from './AdminSections';
 import TareasHoyAdmin from './TareasHoyAdmin';
 import ReportesAvanzado from './ReportesAvanzado';
 import UsuariosCrud from './UsuariosCrud';
+import { useApi } from '../hooks/useApi';
 
 function AdminPanel() {
   const [nuevoUsuario, setNuevoUsuario] = useState({ nombre: '', correo: '', contrasena: '' });
@@ -11,46 +12,59 @@ function AdminPanel() {
   const [reportes, setReportes] = useState({});
   const [usuariosEstado, setUsuariosEstado] = useState([]);
   const [seccion, setSeccion] = useState('usuarios');
+  const { request } = useApi();
 
   useEffect(() => {
     cargarEstadoUsuarios();
   }, []);
 
   const crearUsuario = async () => {
-    await fetch('http://localhost:3000/api/usuarios/crear', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...nuevoUsuario, rol: 'usuario' })
-    });
-    alert('Usuario creado');
+    try {
+      await request('/usuarios/crear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...nuevoUsuario, rol: 'usuario' })
+      });
+      alert('Usuario creado');
+    } catch (err) {
+      alert('Error al crear usuario: ' + err.message);
+    }
   };
 
   const crearTarea = async () => {
-    await fetch('http://localhost:3000/api/tareas/crear', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tarea)
-    });
-    alert('Tarea creada');
+    try {
+      await request('/tareas/crear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tarea)
+      });
+      alert('Tarea creada');
+    } catch (err) {
+      alert('Error al crear tarea: ' + err.message);
+    }
   };
 
   const cargarReportes = async (periodo = '') => {
-    const url = periodo
-      ? `http://localhost:3000/api/reportes/por-fecha/${periodo}`
-      : 'http://localhost:3000/api/reportes';
-    const res = await fetch(url);
-    const data = await res.json();
-    setReportes(data);
+    try {
+      const endpoint = periodo ? `/reportes/por-fecha/${periodo}` : '/reportes';
+      const data = await request(endpoint);
+      setReportes(data);
+    } catch (err) {
+      alert('Error al cargar reportes: ' + err.message);
+    }
   };
 
   const exportar = (formato) => {
-    window.open(`http://localhost:3000/api/reportes/exportar/${formato}`, '_blank');
+    window.open(`https://backend-1-erzl.onrender.com/api/reportes/exportar/${formato}`, '_blank');
   };
 
   const cargarEstadoUsuarios = async () => {
-    const res = await fetch('http://localhost:3000/api/reportes/estado-usuarios');
-    const data = await res.json();
-    setUsuariosEstado(data);
+    try {
+      const data = await request('/reportes/estado-usuarios');
+      setUsuariosEstado(data);
+    } catch (err) {
+      alert('Error al cargar estado de usuarios: ' + err.message);
+    }
   };
 
   return (
