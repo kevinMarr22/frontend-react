@@ -1,0 +1,107 @@
+.layout-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(40, 167, 69, 0.70);
+  color: white;
+  padding: 12px 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  backdrop-filter: blur(2px);
+}
+
+.layout-title {
+  font-size: 1.7rem;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.layout-nav button {
+  background: rgba(255,255,255,0.7);
+  color: #28a745;
+  border: none;
+  border-radius: 6px;
+  margin-left: 10px;
+  padding: 7px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 1px 4px rgba(40,167,69,0.07);
+}
+
+.layout-nav button:hover {
+  background: rgba(40,167,69,0.7);
+  color: white;
+}
+
+.layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 32px 0 0 0;
+}
+
+/* Admin panel sidebar layout */
+.admin-layout {
+  display: flex;
+  width: 100%;
+  min-height: 70vh;
+}
+
+.admin-sidebar {
+  min-width: 150px;
+  max-width: 170px;
+  background: rgba(248,249,250,0.7);
+  border-right: 1px solid rgba(224,224,224,0.5);
+  padding: 18px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  backdrop-filter: blur(1.5px);
+}
+.admin-sidebar h2 {
+  font-size: 1.2rem;
+  margin-bottom: 18px;
+  color: #28a745;
+}
+.admin-sidebar ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+.admin-sidebar li {
+  margin-bottom: 12px;
+}
+.admin-sidebar button {
+  width: 100%;
+  background: none;
+  color: #333;
+  border: none;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: background 0.2s, color 0.2s;
+  background: rgba(255,255,255,0.3);
+}
+.admin-sidebar button.active, .admin-sidebar button:hover {
+  background: rgba(40,167,69,0.7);
+  color: white;
+}
+.admin-content {
+  flex: 1;
+  padding: 32px 16px;
+  min-width: 0;
+  background: rgba(255,255,255,0.6);
+  border-radius: 12px;
+  margin: 24px 18px;
+  box-shadow: 0 2px 12px rgba(40,167,69,0.07);
+}
