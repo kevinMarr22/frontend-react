@@ -1,7 +1,7 @@
 // Hook personalizado para peticiones a la API
 import { useState } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://backend-1-erzl.onrender.com/api';
 
 export function useApi() {
   const [loading, setLoading] = useState(false);
