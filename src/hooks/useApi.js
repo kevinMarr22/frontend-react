@@ -2,7 +2,6 @@
 import { useState } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://backend-1-erzl.onrender.com/api';
-console.log('API_URL:', API_URL);
 
 export function useApi() {
   const [loading, setLoading] = useState(false);
