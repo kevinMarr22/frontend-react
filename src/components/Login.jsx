@@ -1,6 +1,7 @@
 // src/components/Login.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useApi } from '../hooks/useApi';
 
 
 
@@ -11,6 +12,7 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { request, loading: apiLoading, error: apiError } = useApi();
 
   const validar = () => {
     if (!correo.trim() || !contrasena.trim()) return 'Todos los campos son obligatorios';
@@ -29,23 +31,18 @@ function Login() {
     }
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/auth/login', {
+      const data = await request('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ correo, contrasena })
       });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem('usuario', JSON.stringify(data));
-        // Guardar un token dummy para que RequireAuth funcione
-        localStorage.setItem('token', data.id || 'dummy-token');
-        if (data.rol === 'admin') navigate('/admin');
-        else navigate('/usuario');
-      } else {
-        setError(data.mensaje || 'Error al iniciar sesión');
-      }
+      localStorage.setItem('usuario', JSON.stringify(data));
+      // Guardar un token dummy para que RequireAuth funcione
+      localStorage.setItem('token', data.id || 'dummy-token');
+      if (data.rol === 'admin') navigate('/admin');
+      else navigate('/usuario');
     } catch (err) {
-      setError('Error de conexión');
+      setError(err.message || 'Error al iniciar sesión');
     }
     setLoading(false);
   };
