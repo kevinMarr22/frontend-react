@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { FaCheckCircle, FaClock, FaUserPlus, FaMoneyBillWave, FaTasks } from 'react-icons/fa';
 import { MenuUsuario } from './UserMenu';
+import { useApi } from '../hooks/useApi';
 
 function UserPanel() {
   const [tareas, setTareas] = useState([]);
   const [opcion, setOpcion] = useState('todas');
   const [filtroDia, setFiltroDia] = useState('hoy'); // 'todas' | 'hoy'
   const [mensaje, setMensaje] = useState(null);
+  const { request } = useApi();
 
   useEffect(() => {
     cargarTareas();
@@ -19,19 +21,26 @@ function UserPanel() {
   const esUsuario = usuario && usuario.rol === 'usuario';
 
   const cargarTareas = async () => {
-    const res = await fetch('http://localhost:3000/api/tareas/todas');
-    const data = await res.json();
-    setTareas(data);
+    try {
+      const data = await request('/tareas/todas');
+      setTareas(data);
+    } catch (err) {
+      setMensaje('Error al cargar tareas: ' + err.message);
+    }
   };
 
   const asignarTarea = async (id) => {
-    await fetch(`http://localhost:3000/api/tareas/asignar/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usuarioId: usuario.id })
-    });
-    // Esperar a que el backend actualice el estado a 'en progreso' tras asignar
-    setTimeout(cargarTareas, 300); // Pequeño delay para asegurar actualización
+    try {
+      await request(`/tareas/asignar/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId: usuario.id })
+      });
+      // Esperar a que el backend actualice el estado a 'en progreso' tras asignar
+      setTimeout(cargarTareas, 300); // Pequeño delay para asegurar actualización
+    } catch (err) {
+      setMensaje('Error al asignar tarea: ' + err.message);
+    }
   };
 
   const finalizarTarea = async (id, tarea) => {
@@ -41,8 +50,12 @@ function UserPanel() {
       setMensaje('Solo puedes finalizar tareas que te han sido asignadas.');
       return;
     }
-    await fetch(`http://localhost:3000/api/tareas/finalizar/${id}`, { method: 'PUT' });
-    cargarTareas();
+    try {
+      await request(`/tareas/finalizar/${id}`, { method: 'PUT' });
+      cargarTareas();
+    } catch (err) {
+      setMensaje('Error al finalizar tarea: ' + err.message);
+    }
   };
 
   // Filtrado y orden según opción y filtro de día
